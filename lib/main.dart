@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 void main() {
   runApp(const RestaurantApp());
@@ -591,6 +592,28 @@ class RestaurantScreen extends StatefulWidget {
 class _RestaurantScreenState extends State<RestaurantScreen> {
   int categoryIndex = 0;
   final _scrollController = ScrollController();
+  // header image used in the flexible space — keep as a field so we can precache it
+  final String _headerImageUrl = 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop';
+
+  @override
+  void initState() {
+    super.initState();
+    // Precache the header image and some initial item images to reduce scroll jank.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // precache header
+      precacheImage(NetworkImage(_headerImageUrl), context);
+      // precache first few menu item images for the default category
+      try {
+        final app = AppStateWidget.of(context);
+        final items = app.restaurant.categories.first.items;
+        for (var i = 0; i < items.length && i < 4; i++) {
+          precacheImage(NetworkImage(items[i].imageUrl), context);
+        }
+      } catch (_) {
+        // ignore if precache fails for any reason
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -600,32 +623,51 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     final cs = Theme.of(context).colorScheme;
     return CustomScrollView(
       controller: _scrollController,
+      // smoother physics and increased cacheExtent to keep offscreen widgets ready
+      physics: const BouncingScrollPhysics(),
+      cacheExtent: 1000.0,
       slivers: [
         SliverAppBar(
           pinned: true,
           expandedHeight: 220,
           surfaceTintColor: Colors.transparent,
           backgroundColor: cs.surface,
+          // show a back button only when this route can pop, otherwise no leading
+          leading: Navigator.canPop(context) ? BackButton(color: cs.onSurface) : null,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                // Simple feedback for now — replace with a real search flow if desired
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Search tapped')));
+              },
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
+            collapseMode: CollapseMode.parallax,
             titlePadding: const EdgeInsets.only(right: 16, left: 16, bottom: 12),
             title: Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
             background: Stack(fit: StackFit.expand, children: [
-              Image.network(
-                'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop',
+              CachedNetworkImage(
+                imageUrl: _headerImageUrl,
                 fit: BoxFit.cover,
+                memCacheWidth: 1600,
+                memCacheHeight: 900,
+                placeholder: (context, url) => Container(color: cs.surfaceContainerLow),
+                errorWidget: (context, url, error) => Container(color: cs.surfaceContainerLow),
               ),
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black54],
-                  ),
-                ),
-              ),
-            ]),
-          ),
-        ),
+               Container(
+                 decoration: const BoxDecoration(
+                   gradient: LinearGradient(
+                     begin: Alignment.topCenter,
+                     end: Alignment.bottomCenter,
+                     colors: [Colors.transparent, Colors.black54],
+                   ),
+                 ),
+               ),
+             ]),
+           ),
+         ),
         SliverToBoxAdapter(child: RestaurantHeader(r: r)),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
         SliverToBoxAdapter(
@@ -642,7 +684,21 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   selected: selected,
                   selectedColor: cs.secondary,
                   labelStyle: TextStyle(color: selected ? cs.onSecondary : cs.onSurface),
-                  onSelected: (v) => setState(() => categoryIndex = i),
+                  onSelected: (v) {
+                    // update selected category and pre-cache its first images to reduce jank
+                    setState(() => categoryIndex = i);
+                    if (v) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        try {
+                          final app = AppStateWidget.of(context);
+                          final items = app.restaurant.categories[i].items;
+                          for (var k = 0; k < items.length && k < 4; k++) {
+                            precacheImage(NetworkImage(items[k].imageUrl), context);
+                          }
+                        } catch (_) {}
+                      });
+                    }
+                  },
                 );
               },
               separatorBuilder: (context, __) => const SizedBox(width: 8),
@@ -788,22 +844,15 @@ class MenuItemTile extends StatelessWidget {
                       tag: 'img_${item.id}',
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(14),
-                        child: Image.network(
-                          item.imageUrl,
+                        child: CachedNetworkImage(
+                          imageUrl: item.imageUrl,
                           width: 112,
                           height: 92,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 112,
-                              height: 92,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                            );
-                          },
+                          memCacheWidth: 224,
+                          memCacheHeight: 184,
+                          placeholder: (context, url) => Container(width: 112, height: 92, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(14))),
+                          errorWidget: (context, url, error) => Container(width: 112, height: 92, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(14)), child: const Icon(Icons.image_not_supported, color: Colors.grey)),
                         ),
                       ),
                     ),
@@ -894,7 +943,14 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
           tag: 'img_${item.id}',
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.network(item.imageUrl, height: 220, fit: BoxFit.cover),
+            child: CachedNetworkImage(
+              imageUrl: item.imageUrl,
+              height: 220,
+              fit: BoxFit.cover,
+              memCacheWidth: 1200,
+              placeholder: (context, url) => Container(height: 220, color: cs.surfaceContainerLow),
+              errorWidget: (context, url, error) => Container(height: 220, color: cs.surfaceContainerLow),
+            ),
           ),
         ),
         const SizedBox(height: 12),
