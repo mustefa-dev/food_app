@@ -1,26 +1,36 @@
-name: savory_app
-description: Savory – modern restaurant mobile app (feature-first structure, mocks included)
+name: orange_eats
+description: Uber Eats–style app (EN/AR) with API service and dummy fallback
 publish_to: "none"
+version: 1.0.0+1
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
-  cupertino_icons: ^1.0.8
-  go_router: ^14.2.1
-  google_fonts: ^6.2.1
-  provider: ^6.1.2
+  intl: ^0.20.2
+  go_router: ^16.2.2
+  flutter_riverpod: ^2.6.1
+  dio: ^5.6.0
+  pretty_dio_logger: ^1.4.0
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.5.3
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  qr_code_scanner: ^1.0.1
+  google_maps_flutter: ^2.13.1
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  build_runner: ^2.8.0
+  freezed: ^3.2.3
+  json_serializable: ^6.11.1
+  flutter_lints: ^6.0.0
 
-flutter:
-  uses-material-design: true
-  generate: true
