@@ -2,14 +2,14 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../models/models.dart';
 import '../data/demo_data.dart';
+import '../models/models.dart';
 
 class AppState extends ChangeNotifier {
-  // --- AUTH (Demo) ---
-  final Map<String, String> _users = {
-    'demo@hallglow.com': '123456',
-  };
+  AppState();
+
+  // ===== AUTH (Demo) =====
+  final Map<String, String> _users = {'demo@hallglow.com': '123456'};
 
   AppUser? _currentUser;
   AppUser? get currentUser => _currentUser;
@@ -17,14 +17,14 @@ class AppState extends ChangeNotifier {
 
   Future<String?> signIn(String email, String password) async {
     final ok = _users[email] == password;
-    if (!ok) return 'الإيميل أو كلمة المرور غير صحيحة';
+    if (!ok) return 'auth.invalid_creds';
     _currentUser = AppUser(email: email, name: email.split('@').first);
     notifyListeners();
     return null;
   }
 
   Future<String?> signUp(String name, String email, String password) async {
-    if (_users.containsKey(email)) return 'هذا الإيميل مسجّل مسبقًا';
+    if (_users.containsKey(email)) return 'auth.email_exists';
     _users[email] = password;
     _currentUser = AppUser(email: email, name: name);
     notifyListeners();
@@ -36,22 +36,29 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- RESTAURANT ---
-  final Restaurant restaurant = demoRestaurant;
+  // ===== RESTAURANT (from JSON) =====
+  Restaurant? _restaurant;
+  Restaurant get restaurant => _restaurant!;
+  bool get hasRestaurant => _restaurant != null;
 
-  // --- CART ---
+  Future<void> loadDemo() async {
+    _restaurant = await DemoLoader.loadRestaurant();
+    notifyListeners();
+  }
+
+  // ===== CART =====
   final Map<CartLine, int> _cart = {};
   Map<CartLine, int> get cart => Map.unmodifiable(_cart);
   int get cartCount => _cart.values.fold(0, (a, b) => a + b);
-  int get subtotal => _cart.entries.fold(0, (sum, e) => sum + e.key.totalPrice * e.value);
+  int get subtotal =>
+      _cart.entries.fold(0, (sum, e) => sum + e.key.totalPrice * e.value);
 
   int deliveryFee = 1000;
   int serviceFee = 500;
   int tips = 0;
   int freeDeliveryThreshold = 15000;
 
-  // كوبون بسيط: HAL10 = خصم 10%
-  String? appliedCoupon;
+  String? appliedCoupon; // HAL10 = 10% off
   int get discount => appliedCoupon == 'HAL10' ? (subtotal * 0.10).round() : 0;
 
   void applyCoupon(String? code) {
@@ -125,11 +132,12 @@ class AppState extends ChangeNotifier {
 }
 
 class AppStateWidget extends InheritedNotifier<AppState> {
-  const AppStateWidget({super.key, required super.child, required AppState state}) : super(notifier: state);
+  const AppStateWidget({super.key, required super.child, required AppState state})
+      : super(notifier: state);
+
   static AppState of(BuildContext context) {
     final w = context.dependOnInheritedWidgetOfExactType<AppStateWidget>();
     assert(w != null, 'No AppStateWidget found');
     return w!.notifier!;
   }
 }
-

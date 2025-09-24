@@ -32,5 +32,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/mock/
-    - assets/mock/menus/
+    - assets/i18n/en.json
+    - assets/i18n/ar.json
+    - assets/data/demo_restaurant.json

@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:orange_eats_offline_full/src/state/app_state.dart';
 import 'package:orange_eats_offline_full/src/utils/helpers.dart';
-// Project modules
 
-import '../../features/restaurant/restaurant_screen.dart';
-import '../../features/cart/cart_screen.dart';
-import '../../features/orders/orders_screen.dart';
-import '../../features/account/account_screen.dart';
+// Screens
+import '../features/restaurant/restaurant_screen.dart';
+import '../features/cart/cart_screen.dart';
+import '../features/orders/orders_screen.dart';
+import '../features/account/account_screen.dart';
+import 'i18n/i18n.dart';
 
 class Brand {
-  static const primary = Color(0xFF06C167); // Green as primary
-  static const secondary = Color(0xFF34D399); // Lighter green
-  static const tertiary = Color(0xFF059669); // Darker green
-  static const onSurface = Color(0xFF0F172A); // Rich black for text
+  static const primary = Color(0xFF06C167);
+  static const secondary = Color(0xFF34D399);
+  static const tertiary = Color(0xFF059669);
+  static const onSurface = Color(0xFF0F172A);
   static const bg = Color(0xFFFFFFFF);
   static const bgAlt = Color(0xFFF1FDF7);
-  static const outline = Color(0xFFD1FAE5); // Light green outline
-  static const error = Color(0xFFDC2626); // Error red
-  static const warning = Color(0xFFFACC15); // Warning yellow
+  static const outline = Color(0xFFD1FAE5);
+  static const error = Color(0xFFDC2626);
+  static const warning = Color(0xFFFACC15);
 }
 
 ColorScheme _colorScheme(Brightness b) {
@@ -54,7 +56,7 @@ ThemeData buildTheme(Brightness brightness) {
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    fontFamily: 'Cairo', // Add Cairo or Tajawal in pubspec
+    fontFamily: 'Cairo',
     scaffoldBackgroundColor: scheme.surface,
     appBarTheme: AppBarTheme(
       centerTitle: true,
@@ -62,100 +64,78 @@ ThemeData buildTheme(Brightness brightness) {
       backgroundColor: scheme.surface,
       foregroundColor: scheme.onSurface,
       surfaceTintColor: Colors.transparent,
-      titleTextStyle: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w800,
-        color: scheme.onSurface,
-      ),
-    ),
-    cardTheme: CardThemeData(
-      elevation: 0,
-      color: scheme.surface,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    ),
-    chipTheme: ChipThemeData(
-      shape: StadiumBorder(side: BorderSide(color: scheme.outline)),
-      backgroundColor: scheme.surfaceContainerHigh,
-      selectedColor: scheme.secondary.withAlpha(46),
-      labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        elevation: 0,
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        minimumSize: const Size(48, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      ),
-    ),
-    filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: BorderSide(color: scheme.outline),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: scheme.surface,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: scheme.outline),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: scheme.outline),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: scheme.primary),
-      ),
+      titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: scheme.onSurface),
     ),
     navigationBarTheme: NavigationBarThemeData(
       height: 64,
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
-      indicatorColor: scheme.primary.withAlpha(41), // Fixed opacity warning
+      indicatorColor: scheme.primary.withAlpha(41),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
-    snackBarTheme: SnackBarThemeData(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: scheme.inverseSurface,
-      contentTextStyle: TextStyle(color: scheme.onInverseSurface),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: scheme.surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: scheme.outline)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: scheme.outline)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: scheme.primary)),
     ),
     dividerTheme: DividerThemeData(color: scheme.outlineVariant),
   );
 }
 
-// ===================== APP =====================
 class RestaurantApp extends StatelessWidget {
   const RestaurantApp({super.key});
+
+  Future<(I18n, AppState)> _bootstrap() async {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final lang = (locale.languageCode == 'ar') ? 'ar' : 'en';
+    final i18n = I18n(Locale(lang));
+    await i18n.load(i18n.locale);
+
+    final state = AppState();
+    await state.loadDemo();
+
+    return (i18n, state);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AppStateWidget(
-      state: AppState(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'مطعم واحد — HallGlow',
-        theme: buildTheme(Brightness.light),
-        darkTheme: buildTheme(Brightness.dark),
-        themeMode: ThemeMode.system,
-        home: const Directionality(
-          textDirection: TextDirection.rtl,
-          child: MainScaffold(),
-        ),
-      ),
+    return FutureBuilder<(I18n, AppState)>(
+      future: _bootstrap(),
+      builder: (context, snap) {
+        if (snap.connectionState != ConnectionState.done) {
+          return const MaterialApp(home: SizedBox());
+        }
+        final (i18n, state) = snap.data!;
+        return AppStateWidget(
+          state: state,
+          child: I18nProvider(
+            i18n: i18n,
+            child: AnimatedBuilder(
+              animation: i18n,
+              builder: (context, _) {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: i18n.t('app.title'),
+                  theme: buildTheme(Brightness.light),
+                  darkTheme: buildTheme(Brightness.dark),
+                  themeMode: ThemeMode.system,
+                  supportedLocales: const [Locale('ar'), Locale('en')],
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                  ],
+                  locale: i18n.locale,
+                  home: const MainScaffold(),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -174,16 +154,18 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     final app = AppStateWidget.of(context);
     final cs = Theme.of(context).colorScheme;
+    final t = I18nProvider.of(context);
+
     return Stack(
       children: [
         Scaffold(
           body: _pages[_index],
           bottomNavigationBar: NavigationBar(
             selectedIndex: _index,
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.home_outlined), label: 'الرئيسية'),
-              NavigationDestination(icon: Icon(Icons.receipt_long_outlined), label: 'طلباتي'),
-              NavigationDestination(icon: Icon(Icons.person_outline), label: 'حسابي'),
+            destinations: [
+              NavigationDestination(icon: const Icon(Icons.home_outlined), label: t.t('nav.home')),
+              NavigationDestination(icon: const Icon(Icons.receipt_long_outlined), label: t.t('nav.orders')),
+              NavigationDestination(icon: const Icon(Icons.person_outline), label: t.t('nav.account')),
             ],
             onDestinationSelected: (i) => setState(() => _index = i),
           ),
@@ -200,8 +182,12 @@ class _MainScaffoldState extends State<MainScaffold> {
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
+              // ✅ إصلاح التنقّل: لا تستخدم copyWith على MaterialPageRoute
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CartScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const CartScreen(),
+                  settings: const RouteSettings(name: 'cart'),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -214,9 +200,12 @@ class _MainScaffoldState extends State<MainScaffold> {
                       child: Text(app.cartCount.toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(width: 8),
-                    const Text('شوف السلة', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(t.t('cta.view_cart'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                   ]),
-                  Text('د.ع ${formatIQD(app.subtotal)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  Text(
+                    '${currencyLabel(context)}${formatIQD(app.subtotal)}',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  ),
                 ],
               ),
             ),

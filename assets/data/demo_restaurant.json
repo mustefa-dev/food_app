@@ -1,0 +1,123 @@
+{
+  "nameEn": "Adnan Abu Al-Dhalaa Restaurant",
+  "nameAr": "مطعم عدنان أبو الظلع",
+  "rating": 4.6,
+  "reviews": 1240,
+  "deliveryMinutesMin": 15,
+  "deliveryMinutesMax": 25,
+  "deliveryFee": 1000,
+  "categories": [
+    {
+      "id": "picks",
+      "nameEn": "Picks for you",
+      "nameAr": "مختارات لك",
+      "items": [
+        {
+          "id": "foul_ghee",
+          "titleEn": "Foul with Ghee",
+          "titleAr": "فول بالسمن",
+          "descEn": "Bread, oil, egg, ghee",
+          "descAr": "خبز، زيت، بيض، سمن",
+          "price": 6000,
+          "imageUrl": "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?q=80&w=1200&auto=format&fit=crop",
+          "addOns": [
+            { "id": "bread", "nameEn": "Extra bread",  "nameAr": "خبز إضافي",   "price": 500 },
+            { "id": "egg",   "nameEn": "Extra egg",    "nameAr": "بيضة إضافية", "price": 1000 }
+          ]
+        },
+        {
+          "id": "makhlama",
+          "titleEn": "Makhlama",
+          "titleAr": "مخلمة",
+          "descEn": "Eggs with meat and tomato",
+          "descAr": "بيض مع لحم وبندورة",
+          "price": 6000,
+          "imageUrl": "https://images.unsplash.com/photo-1508737027454-29eb0a3883b8?q=80&w=1200&auto=format&fit=crop",
+          "addOns": [
+            { "id": "bread", "nameEn": "Extra bread", "nameAr": "خبز إضافي", "price": 500 },
+            { "id": "spicy", "nameEn": "Extra spicy", "nameAr": "زيادة حار",  "price": 0   }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "breakfast",
+      "nameEn": "Breakfast",
+      "nameAr": "فطور",
+      "items": [
+        {
+          "id": "earook",
+          "titleEn": "Earook Kebab",
+          "titleAr": "عروق كباب",
+          "descEn": "Grilled kebab with tomato and pickles",
+          "descAr": "كباب مشوي مع طماطم ومخللات",
+          "price": 6000,
+          "imageUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop",
+          "addOns": [
+            { "id": "tomato", "nameEn": "Extra tomato", "nameAr": "طماطم زيادة", "price": 500 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grills",
+      "nameEn": "Grills",
+      "nameAr": "مشويات",
+      "items": [
+        {
+          "id": "meat_kebab",
+          "titleEn": "Meat Kebab",
+          "titleAr": "كباب لحم",
+          "descEn": "Grilled kebab with tomato and onion",
+          "descAr": "كباب مشوي مع طماطم وبصل",
+          "price": 7500,
+          "imageUrl": "https://images.unsplash.com/photo-1604908554027-27bc33f5f2df?q=80&w=1200&auto=format&fit=crop",
+          "addOns": [
+            { "id": "pickles", "nameEn": "Extra pickles", "nameAr": "مخلل إضافي", "price": 500 }
+          ]
+        },
+        {
+          "id": "meat_tikka",
+          "titleEn": "Meat Tikka",
+          "titleAr": "تكة لحم",
+          "descEn": "Grilled tikka with parsley and pickles",
+          "descAr": "تكة مشوية مع بقدونس ومخللات",
+          "price": 7500,
+          "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1200&auto=format&fit=crop",
+          "addOns": [
+            { "id": "bread", "nameEn": "Extra bread", "nameAr": "خبز إضافي", "price": 500 }
+          ]
+        },
+        {
+          "id": "ribs",
+          "titleEn": "Ribs",
+          "titleAr": "أضلاع",
+          "descEn": "Charcoal-grilled ribs",
+          "descAr": "أضلاع مشوية على الفحم",
+          "price": 14000,
+          "imageUrl": "https://images.unsplash.com/photo-1604908177074-0010b1f5c0bb?q=80&w=1200&auto=format&fit=crop",
+          "addOns": [
+            { "id": "garlic", "nameEn": "Garlic sauce", "nameAr": "صوص ثوم", "price": 500 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drinks",
+      "nameEn": "Drinks",
+      "nameAr": "مشروبات",
+      "items": [
+        {
+          "id": "water",
+          "titleEn": "Bottled Water",
+          "titleAr": "مي قنينة",
+          "descEn": "Plain water",
+          "descAr": "ماء عادي",
+          "price": 1000,
+          "imageUrl": "https://images.unsplash.com/photo-1526403227865-6b0f430a04f4?q=80&w=1200&auto=format&fit=crop",
+          "addOns": []
+        }
+      ]
+    }
+  ]
+}

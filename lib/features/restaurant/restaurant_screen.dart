@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../main.dart';
 import '../../src/models/models.dart';
 import '../../src/state/app_state.dart';
 import '../../src/utils/helpers.dart';
+import '../../src/i18n/i18n.dart';
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
@@ -34,10 +34,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = I18nProvider.of(context);
     final app = AppStateWidget.of(context);
     final r = app.restaurant;
     final cat = r.categories[categoryIndex];
     final cs = Theme.of(context).colorScheme;
+
     return CustomScrollView(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
@@ -52,31 +54,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Search tapped'))),
+              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(t.t('common.search_tapped'))),
+              ),
             ),
           ],
           flexibleSpace: FlexibleSpaceBar(
             collapseMode: CollapseMode.parallax,
             titlePadding: const EdgeInsets.only(right: 16, left: 16, bottom: 12),
-            title: Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+            title: Text(
+              textOf(context, r.name),
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
             background: Stack(fit: StackFit.expand, children: [
               CachedNetworkImage(
-                imageUrl: _headerImageUrl,
-                fit: BoxFit.cover,
-                memCacheWidth: 1600,
-                memCacheHeight: 900,
+                imageUrl: _headerImageUrl, fit: BoxFit.cover,
+                memCacheWidth: 1600, memCacheHeight: 900,
                 placeholder: (context, url) => Container(color: cs.surfaceContainerLow),
                 errorWidget: (context, url, error) => Container(color: cs.surfaceContainerLow),
               ),
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black54],
-                  ),
-                ),
-              ),
+              Container(decoration: const BoxDecoration(
+                gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black54]),
+              )),
             ]),
           ),
         ),
@@ -92,7 +92,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 final c = r.categories[i];
                 final selected = i == categoryIndex;
                 return ChoiceChip(
-                  label: Text(c.name),
+                  label: Text(textOf(context, c.name)),
                   selected: selected,
                   selectedColor: cs.secondary,
                   labelStyle: TextStyle(color: selected ? cs.onSecondary : cs.onSurface),
@@ -133,20 +133,21 @@ class RestaurantHeader extends StatelessWidget {
   const RestaurantHeader({super.key, required this.r});
   @override
   Widget build(BuildContext context) {
+    final t = I18nProvider.of(context);
     final app = AppStateWidget.of(context);
     final cs = Theme.of(context).colorScheme;
     final remain = app.remainingForFreeDelivery;
     final reached = app.isFreeDelivery;
     final totalBefore = app.totalBeforeFees;
     final progress = (totalBefore / app.freeDeliveryThreshold).clamp(0.0, 1.0);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
+            color: cs.surface, borderRadius: BorderRadius.circular(14),
             boxShadow: const [BoxShadow(color: Color(0x14000000), blurRadius: 14, offset: Offset(0, 6))],
           ),
           child: Row(children: [
@@ -158,11 +159,14 @@ class RestaurantHeader extends StatelessWidget {
             const SizedBox(width: 10),
             const Icon(Icons.timer_outlined, size: 18),
             const SizedBox(width: 4),
-            Text('${r.deliveryMinutesMin} - ${r.deliveryMinutesMax} دقيقة'),
+            Text(t.t('restaurant.time_range', params: {'min': r.deliveryMinutesMin, 'max': r.deliveryMinutesMax})),
             const Spacer(),
             const Icon(Icons.delivery_dining_outlined, size: 18),
             const SizedBox(width: 6),
-            Text('د.ع ${formatIQD(app.isFreeDelivery ? 0 : r.deliveryFee)}', style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text(
+              '${currencyLabel(context)}${AppStateWidget.of(context).isFreeDelivery ? 0 : r.deliveryFee}',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
           ]),
         ),
         const SizedBox(height: 10),
@@ -177,16 +181,18 @@ class RestaurantHeader extends StatelessWidget {
               Row(children: [
                 Icon(Icons.local_shipping_outlined, color: cs.tertiary),
                 const SizedBox(width: 8),
-                Expanded(child: Text('أضف د.ع ${formatIQD(remain)} لتحصل على توصيل مجاني', style: const TextStyle(fontWeight: FontWeight.w600))),
+                Expanded(
+                  child: Text(
+                    t.t('restaurant.add_more_for_free_delivery', params: {'remain': formatIQD(remain)}),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
               ]),
               const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
-                  minHeight: 8,
-                  value: progress,
-                  color: cs.tertiary,
-                  backgroundColor: cs.tertiary.withOpacity(.25),
+                  minHeight: 8, value: progress, color: cs.tertiary, backgroundColor: cs.tertiary.withOpacity(.25),
                 ),
               ),
             ]),
@@ -198,7 +204,7 @@ class RestaurantHeader extends StatelessWidget {
             child: Row(children: [
               Icon(Icons.verified, color: cs.secondary),
               const SizedBox(width: 8),
-              const Expanded(child: Text('تم تفعيل التوصيل المجاني', style: TextStyle(fontWeight: FontWeight.w700))),
+              Expanded(child: Text(t.t('restaurant.free_delivery_activated'), style: const TextStyle(fontWeight: FontWeight.w700))),
             ]),
           ),
         ),
@@ -215,77 +221,50 @@ class MenuItemTile extends StatelessWidget {
     final app = AppStateWidget.of(context);
     final cs = Theme.of(context).colorScheme;
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => ItemDetailBottomSheet(item: item)),
-      ),
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ItemDetailBottomSheet(item: item))),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(item.title,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 6),
-                      Text(item.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey[700])),
-                      const SizedBox(height: 10),
-                      Text('د.ع ${formatIQD(item.price)}',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: cs.primary)),
-                    ]),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            flex: 3,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(textOf(context, item.title), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 6),
+              Text(textOf(context, item.description), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey[700])),
+              const SizedBox(height: 10),
+              Text('${currencyLabel(context)}${formatIQD(item.price)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: cs.primary)),
+            ]),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 112, height: 92,
+            child: Stack(children: [
+              Hero(
+                tag: 'img_${item.id}',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: CachedNetworkImage(
+                    imageUrl: item.imageUrl, width: 112, height: 92, fit: BoxFit.cover,
+                    memCacheWidth: 224, memCacheHeight: 184,
+                    placeholder: (context, url) => Container(width: 112, height: 92, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(14))),
+                    errorWidget: (context, url, error) => Container(width: 112, height: 92, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(14)), child: const Icon(Icons.image_not_supported, color: Colors.grey)),
+                  ),
+                ),
               ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 112,
-                height: 92,
-                child: Stack(
-                  children: [
-                    Hero(
-                      tag: 'img_${item.id}',
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: CachedNetworkImage(
-                          imageUrl: item.imageUrl,
-                          width: 112,
-                          height: 92,
-                          fit: BoxFit.cover,
-                          memCacheWidth: 224,
-                          memCacheHeight: 184,
-                          placeholder: (context, url) => Container(width: 112, height: 92, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(14))),
-                          errorWidget: (context, url, error) => Container(width: 112, height: 92, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(14)), child: const Icon(Icons.image_not_supported, color: Colors.grey)),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: 6,
-                      bottom: 6,
-                      child: Material(
-                        color: cs.primary,
-                        shape: const CircleBorder(),
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: () => app.addToCart(item),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Icon(Icons.add, color: Colors.white, size: 20),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
+              Positioned(
+                right: 6, bottom: 6,
+                child: Material(
+                  color: cs.primary, shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => app.addToCart(item),
+                    child: const Padding(padding: EdgeInsets.all(8.0), child: Icon(Icons.add, color: Colors.white, size: 20)),
+                  ),
                 ),
               )
             ]),
+          )
+        ]),
       ),
     );
   }
@@ -305,6 +284,7 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = I18nProvider.of(context);
     final app = AppStateWidget.of(context);
     final item = widget.item;
     final addOnsPrice = selected.fold(0, (s, a) => s + a.price);
@@ -313,7 +293,7 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(item.title)),
+      appBar: AppBar(title: Text(textOf(context, item.title))),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(12),
         child: SizedBox(
@@ -323,15 +303,9 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(12)),
               child: Row(children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () => setState(() => qty = (qty - 1).clamp(1, 99)),
-                ),
+                IconButton(icon: const Icon(Icons.remove), onPressed: () => setState(() => qty = (qty - 1).clamp(1, 99))),
                 Text('$qty', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => setState(() => qty = (qty + 1).clamp(1, 99)),
-                ),
+                IconButton(icon: const Icon(Icons.add), onPressed: () => setState(() => qty = (qty + 1).clamp(1, 99))),
               ]),
             ),
             const SizedBox(width: 10),
@@ -341,7 +315,7 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
                   app.addToCart(item, quantity: qty, addOns: List.of(selected));
                   Navigator.pop(context);
                 },
-                child: Text('أضف • د.ع ${formatIQD(lineTotal)}'),
+                child: Text(t.t('item.add_price', params: {'amount': formatIQD(lineTotal)})),
               ),
             ),
           ]),
@@ -353,27 +327,24 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: CachedNetworkImage(
-              imageUrl: item.imageUrl,
-              height: 220,
-              fit: BoxFit.cover,
-              memCacheWidth: 1200,
+              imageUrl: item.imageUrl, height: 220, fit: BoxFit.cover, memCacheWidth: 1200,
               placeholder: (context, url) => Container(height: 220, color: cs.surfaceContainerLow),
               errorWidget: (context, url, error) => Container(height: 220, color: cs.surfaceContainerLow),
             ),
           ),
         ),
         const SizedBox(height: 12),
-        Text(item.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+        Text(textOf(context, item.title), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
         const SizedBox(height: 4),
-        Text(item.description),
+        Text(textOf(context, item.description)),
         if (item.addOns.isNotEmpty) ...[
           const SizedBox(height: 16),
-          sectionTitle('الإضافات'),
+          sectionTitle(t.t('item.addons')),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final a in item.addOns)
               FilterChip(
-                label: Text('${a.name}${a.price > 0 ? ' • د.ع ${formatIQD(a.price)}' : ''}'),
+                label: Text('${textOf(context, a.name)}${a.price > 0 ? ' • ${currencyLabel(context)}${formatIQD(a.price)}' : ''}'),
                 selected: selected.contains(a),
                 selectedColor: cs.secondary.withOpacity(.18),
                 onSelected: (v) => setState(() { v ? selected.add(a) : selected.remove(a); }),
@@ -381,12 +352,14 @@ class _ItemDetailBottomSheetState extends State<ItemDetailBottomSheet> {
           ])
         ],
         const SizedBox(height: 16),
-        sectionTitle('ملاحظات التوصيل'),
-        Wrap(spacing: 8, children: const [
-          QuickPill('لا دق الجرس'), QuickPill('اتصل عند الوصول'), QuickPill('صلصة زيادة'),
+        sectionTitle(t.t('item.delivery_notes')),
+        Wrap(spacing: 8, children: [
+          QuickPill(t.t('pill.no_bell')),
+          QuickPill(t.t('pill.call_on_arrival')),
+          QuickPill(t.t('pill.extra_sauce')),
         ]),
         const SizedBox(height: 8),
-        TextField(controller: noteCtrl, minLines: 2, maxLines: 4, decoration: const InputDecoration(hintText: 'اكتب ملاحظاتك هنا')),
+        TextField(controller: noteCtrl, minLines: 2, maxLines: 4, decoration: InputDecoration(hintText: t.t('item.write_note'))),
         const SizedBox(height: 80),
       ]),
     );
@@ -401,4 +374,3 @@ class QuickPill extends StatelessWidget {
     return Padding(padding: const EdgeInsets.only(bottom: 6), child: Chip(label: Text(text)));
   }
 }
-

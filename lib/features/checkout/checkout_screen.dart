@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../main.dart';
 import '../../src/state/app_state.dart';
 import '../../src/models/models.dart';
 import '../../src/utils/helpers.dart';
+import '../../src/i18n/i18n.dart';
 import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
 
@@ -14,9 +14,11 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   int selectedAddress = 0;
-  String payment = 'بطاقة •••• 8075';
+  String payment = '**** 8075';
+
   @override
   Widget build(BuildContext context) {
+    final t = I18nProvider.of(context);
     final app = AppStateWidget.of(context);
     final info = CheckoutInfo(
       address: app.savedAddresses[selectedAddress].details,
@@ -24,9 +26,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('اتمام الطلب')),
+      appBar: AppBar(title: Text(t.t('checkout.title'))),
       body: ListView(padding: const EdgeInsets.all(16), children: [
-        sectionTitle('عنوان التوصيل'),
+        sectionTitle(t.t('checkout.delivery_address')),
         const SizedBox(height: 6),
         for (int i = 0; i < app.savedAddresses.length; i++)
           Card(
@@ -39,24 +41,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
         const SizedBox(height: 12),
-        sectionTitle('الدفع'),
+        sectionTitle(t.t('checkout.payment')),
         RadioListTile<String>(
-          value: 'بطاقة •••• 8075',
+          value: '**** 8075',
           groupValue: payment,
           onChanged: (v) => setState(() => payment = v!),
-          title: const Text('Mastercard •••• 8075'),
+          title: Text('${t.t("checkout.card")} •••• 8075'),
         ),
         RadioListTile<String>(
-          value: 'بطاقة •••• 2590',
+          value: '**** 2590',
           groupValue: payment,
           onChanged: (v) => setState(() => payment = v!),
-          title: const Text('Mastercard •••• 2590'),
+          title: Text('${t.t("checkout.card")} •••• 2590'),
         ),
         RadioListTile<String>(
-          value: 'دفع عند التسليم',
+          value: t.t('checkout.cod'),
           groupValue: payment,
           onChanged: (v) => setState(() => payment = v!),
-          title: const Text('كاش عند التسليم'),
+          title: Text(t.t('checkout.cod')),
         ),
         const Divider(height: 32),
         PaymentSummary(
@@ -80,10 +82,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               );
             }
           },
-          child: const Text('تأكيد الطلب'),
+          child: Text(t.t('checkout.confirm')),
         ),
       ]),
     );
   }
 }
 
+class OrderPlacedScreen extends StatelessWidget {
+  const OrderPlacedScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final t = I18nProvider.of(context);
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.check_circle, size: 96, color: Color(0xFF34D399)),
+            const SizedBox(height: 16),
+            Text(t.t('checkout.placed'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(t.t('checkout.eta')),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const OrderTrackingScreen()),
+                    (route) => false,
+              ),
+              child: Text(t.t('checkout.track_order')),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}

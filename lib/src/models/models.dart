@@ -1,4 +1,4 @@
-// Models used across the app
+import 'localized.dart';
 
 class AppUser {
   final String email;
@@ -7,13 +7,14 @@ class AppUser {
 }
 
 class Restaurant {
-  final String name;
+  final LocalizedText name;
   final double rating;
   final int reviews;
   final int deliveryMinutesMin;
   final int deliveryMinutesMax;
   final int deliveryFee;
   final List<MenuCategory> categories;
+
   Restaurant({
     required this.name,
     required this.rating,
@@ -23,29 +24,64 @@ class Restaurant {
     required this.deliveryFee,
     required this.categories,
   });
+
+  factory Restaurant.fromJson(Map<String, dynamic> j) {
+    return Restaurant(
+      name: LocalizedText.custom(j, enKey: 'nameEn', arKey: 'nameAr'),
+      rating: (j['rating'] as num).toDouble(),
+      reviews: j['reviews'] as int,
+      deliveryMinutesMin: j['deliveryMinutesMin'] as int,
+      deliveryMinutesMax: j['deliveryMinutesMax'] as int,
+      deliveryFee: j['deliveryFee'] as int,
+      categories: (j['categories'] as List)
+          .map((c) => MenuCategory.fromJson(c as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 class MenuCategory {
   final String id;
-  final String name;
+  final LocalizedText name;
   final List<MenuItem> items;
+
   MenuCategory({required this.id, required this.name, required this.items});
+
+  factory MenuCategory.fromJson(Map<String, dynamic> j) {
+    return MenuCategory(
+      id: j['id'] as String,
+      name: LocalizedText.custom(j, enKey: 'nameEn', arKey: 'nameAr'),
+      items: (j['items'] as List)
+          .map((i) => MenuItem.fromJson(i as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 class AddOn {
   final String id;
-  final String name;
+  final LocalizedText name;
   final int price;
+
   const AddOn({required this.id, required this.name, required this.price});
+
+  factory AddOn.fromJson(Map<String, dynamic> j) {
+    return AddOn(
+      id: j['id'] as String,
+      name: LocalizedText.custom(j, enKey: 'nameEn', arKey: 'nameAr'),
+      price: j['price'] as int,
+    );
+  }
 }
 
 class MenuItem {
   final String id;
-  final String title;
-  final String description;
+  final LocalizedText title;
+  final LocalizedText description;
   final int price; // IQD
   final String imageUrl;
-  final List<AddOn> addOns; // optional add-ons
+  final List<AddOn> addOns;
+
   const MenuItem({
     required this.id,
     required this.title,
@@ -54,6 +90,19 @@ class MenuItem {
     required this.imageUrl,
     this.addOns = const [],
   });
+
+  factory MenuItem.fromJson(Map<String, dynamic> j) {
+    return MenuItem(
+      id: j['id'] as String,
+      title: LocalizedText.custom(j, enKey: 'titleEn', arKey: 'titleAr'),
+      description: LocalizedText.custom(j, enKey: 'descEn', arKey: 'descAr'),
+      price: j['price'] as int,
+      imageUrl: j['imageUrl'] as String,
+      addOns: (j['addOns'] as List? ?? const [])
+          .map((a) => AddOn.fromJson(a as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 class CartLine {
@@ -126,4 +175,3 @@ class CheckoutInfo {
   String paymentMethod;
   CheckoutInfo({required this.address, required this.paymentMethod});
 }
-
