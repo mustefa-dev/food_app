@@ -1,16 +1,19 @@
-# food_app
+# Orange Eats (Offline-First, EN/AR, Mock/Real API)
 
-A new Flutter project.
+Run (real API default; replace URL):
+```bash
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+```
+Mock mode (loads from assets/mock):
+```bash
+flutter run --dart-define=USE_MOCK_API=true
+```
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Offline-first with Hive caching.
+- Bilingual EN/AR (RTL) with profile toggle.
+- Auth screens always available; returning users can log in offline.
+- QR → Favorites drawer (set default, remove) + auto-open last.
+- Restaurant → Cart → Checkout.
+- Orders with offline PENDING_SYNC and auto-sync.
+- Shimmer loaders + connectivity banners.
